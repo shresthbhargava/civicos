@@ -1,0 +1,22 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: civicos-postgres
+    environment:
+      POSTGRES_DB: civicos
+      POSTGRES_USER: civicos
+      POSTGRES_PASSWORD: civicos
+    ports:
+      - "5432:5432"
+    volumes:
+      - civicos_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U civicos -d civicos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  civicos_postgres_data:
