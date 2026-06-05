@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.civicos.platform.domain.official.application.OfficialService;
 import com.civicos.platform.domain.official.application.OfficialResponse;
+import com.civicos.platform.domain.act.domain.ActRepository;
+import com.civicos.platform.domain.act.application.ActResponse;
 
 
 import java.sql.SQLException;
@@ -24,6 +26,7 @@ public class IncidentSearchService {
     private final IncidentCategoryRepository incidentCategoryRepository;
     private final AccountabilityService accountabilityService;
     private final OfficialService officialService;
+    private final ActRepository actRepository;
 
     /**
      * Column indexes from native SQL query.
@@ -151,6 +154,10 @@ public class IncidentSearchService {
                         .jurisdictionLevel(deptJurisdictionLevel)
                         .currentOfficials(officials)
                         .build();
+        List<ActResponse> relevantActs = actRepository.findByCategoryId(categoryId)
+                .stream()
+                .map(ActResponse::from)
+                .collect(Collectors.toList());
 
         return IncidentSearchResponse.IncidentMatch.builder()
                 .categoryId(categoryId)
@@ -160,6 +167,7 @@ public class IncidentSearchService {
                 .responsibleDepartment(deptSummary)
                 .accountabilityChain(chain)
                 .citizenActions(Arrays.asList(citizenActions))
+                .relevantActs(relevantActs)
                 .build();
     }
 

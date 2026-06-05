@@ -3,6 +3,7 @@ package com.civicos.platform.domain.incident.application;
 import com.civicos.platform.domain.department.application.AccountabilityNode;
 import com.civicos.platform.domain.department.domain.Department;
 import com.civicos.platform.domain.official.application.OfficialResponse;
+import com.civicos.platform.domain.act.application.ActResponse;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -27,6 +28,8 @@ public class IncidentSearchResponse {
         private DepartmentSummary responsibleDepartment;
         private List<AccountabilityNode> accountabilityChain;
         private List<String> citizenActions;
+        private List<ActResponse> relevantActs;
+
     }
 
     @Getter
