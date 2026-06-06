@@ -193,8 +193,8 @@ src/main/java/com/civicos/platform/
 │   ├── exception/        # Global exception handling
 │   ├── logging/          # Request tracing
 │   └── response/         # API response envelope
-├── config/               # CORS, Security config
-── domain/
+├── config/              # CORS, Security config
+|── domain/
 ├── act/              # Acts & Laws
 ├── department/       # Department hierarchy
 ├── incident/         # Incident search
