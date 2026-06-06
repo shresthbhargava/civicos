@@ -2,6 +2,7 @@ services:
   - type: web
     name: civicos-backend
     runtime: java
+    plan: free
     buildCommand: ./gradlew build -x test
     startCommand: java -jar build/libs/civicos-0.0.1-SNAPSHOT.jar
     envVars:
