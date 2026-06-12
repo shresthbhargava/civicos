@@ -4,6 +4,7 @@ import com.civicos.platform.domain.department.domain.Department;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import jakarta.persistence.Column;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -44,10 +45,15 @@ public class IncidentCategory {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = Instant.now();
-        updatedAt = Instant.now();
+    @Column(columnDefinition = "vector(768)")
+    private String embedding;
+
+    public void setEmbedding(String embedding) {
+        this.embedding = embedding;
+    }
+
+    public String getEmbedding() {
+        return embedding;
     }
 
     @PreUpdate

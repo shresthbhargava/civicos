@@ -25,6 +25,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.flywaydb:flyway-core")
+    
+// pgvector JDBC support
+    implementation("com.pgvector:pgvector:0.1.6")
     implementation("org.flywaydb:flyway-database-postgresql")
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
@@ -47,3 +50,4 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+

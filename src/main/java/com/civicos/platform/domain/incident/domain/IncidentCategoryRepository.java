@@ -63,4 +63,24 @@ ORDER BY
             @Param("stateCode") String stateCode,
             @Param("districtCode") String districtCode
     );
+
+    @Query(value = """
+    SELECT ic.*, 
+           1 - (ic.embedding <=> CAST(:embedding AS vector)) AS similarity
+    FROM incident_categories ic
+    INNER JOIN incident_category_departments icd ON icd.incident_category_id = ic.id
+    INNER JOIN departments d ON d.id = icd.department_id
+    WHERE ic.embedding IS NOT NULL
+    AND (
+        :stateCode IS NULL 
+        OR d.state_code = :stateCode 
+        OR d.jurisdiction_level = 'CENTRAL'
+    )
+    ORDER BY ic.embedding <=> CAST(:embedding AS vector)
+    LIMIT 3
+    """, nativeQuery = true)
+    List<Object[]> searchByEmbedding(
+            @Param("embedding") String embedding,
+            @Param("stateCode") String stateCode
+    );
 }

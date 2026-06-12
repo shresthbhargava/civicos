@@ -75,3 +75,5 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId}] %-5level %logger{36} - %msg%n"
 
+openai:
+  api-key: ${OPENAI_API_KEY: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}

@@ -3,6 +3,7 @@ package com.civicos.platform.domain.incident.application;
 import com.civicos.platform.domain.department.application.AccountabilityNode;
 import com.civicos.platform.domain.department.application.AccountabilityService;
 import com.civicos.platform.domain.incident.domain.IncidentCategoryRepository;
+import com.civicos.platform.common.ai.EmbeddingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class IncidentSearchService {
     private final AccountabilityService accountabilityService;
     private final OfficialService officialService;
     private final ActRepository actRepository;
-
+    private final EmbeddingService embeddingService;
     /**
      * Column indexes from native SQL query.
      */
@@ -64,27 +65,30 @@ public class IncidentSearchService {
             String rawQuery,
             LocationContext location
     ) {
-
         List<String> queryTokens = tokenize(rawQuery);
 
-        log.info(
-                "Incident search query='{}' tokens={} state={} district={}",
-                rawQuery,
-                queryTokens,
+        log.info("Incident search query='{}' tokens={} state={} district={}",
+                rawQuery, queryTokens,
+                location.getStateCode(),
+                location.getDistrictCode());
+
+        String[] tokenArray = queryTokens.toArray(new String[0]);
+
+        // Try keyword search first
+        List<Object[]> rows = incidentCategoryRepository.searchByKeywordsAndLocation(
+                tokenArray,
                 location.getStateCode(),
                 location.getDistrictCode()
         );
 
-        String[] tokenArray = queryTokens.toArray(new String[0]);
+        log.debug("Keyword search returned {} rows", rows.size());
 
-        List<Object[]> rows =
-                incidentCategoryRepository.searchByKeywordsAndLocation(
-                        tokenArray,
-                        location.getStateCode(),
-                        location.getDistrictCode()
-                );
-
-        log.debug("Query returned {} rows", rows.size());
+        // Fall back to semantic search if no keyword results
+        if (rows.isEmpty()) {
+            log.info("No keyword results — falling back to semantic search");
+            rows = semanticSearch(rawQuery, location.getStateCode());
+            log.debug("Semantic search returned {} rows", rows.size());
+        }
 
         List<IncidentSearchResponse.IncidentMatch> matches =
                 rows.stream()
@@ -93,9 +97,29 @@ public class IncidentSearchService {
 
         return IncidentSearchResponse.builder()
                 .query(rawQuery)
-                .matchType("KEYWORD")
+                .matchType(rows.isEmpty() ? "NO_MATCH" : "KEYWORD")
                 .matches(matches)
                 .build();
+    }
+
+    private List<Object[]> semanticSearch(String query, String stateCode) {
+        try {
+            String embedding = embeddingService.getEmbedding(query);
+            return incidentCategoryRepository.searchByEmbedding(embedding, stateCode);
+        } catch (Exception e) {
+            log.warn("Semantic search failed: {}", e.getMessage());
+            return List.of();
+        }
+    }
+
+    private String toPgVectorString(float[] embedding) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < embedding.length; i++) {
+            sb.append(embedding[i]);
+            if (i < embedding.length - 1) sb.append(",");
+        }
+        sb.append("]");
+        return sb.toString();
     }
 
     private IncidentSearchResponse.IncidentMatch buildMatchFromRow(
