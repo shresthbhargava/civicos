@@ -1,5 +1,7 @@
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /app
-COPY build/libs/civicos-0.0.1-SNAPSHOT.jar app.jar
+COPY . .
+RUN chmod +x gradlew
+RUN ./gradlew build -x test --no-daemon
 EXPOSE 8080
-CMD ["java", "-jar", "app.jar"]
+CMD ["java", "-jar", "build/libs/civicos-0.0.1-SNAPSHOT.jar"]
