@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.cache.annotation.Cacheable;
 
 @Slf4j
 @Service
@@ -19,6 +20,7 @@ public class OfficialService {
     private final OfficialPostingRepository officialPostingRepository;
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "current-officials", key = "#departmentId")
     public List<OfficialResponse> getCurrentOfficials(Long departmentId) {
         log.debug("Fetching current officials for departmentId={}", departmentId);
 

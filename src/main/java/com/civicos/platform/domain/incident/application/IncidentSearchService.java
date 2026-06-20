@@ -12,7 +12,7 @@ import com.civicos.platform.domain.official.application.OfficialService;
 import com.civicos.platform.domain.official.application.OfficialResponse;
 import com.civicos.platform.domain.act.domain.ActRepository;
 import com.civicos.platform.domain.act.application.ActResponse;
-
+import org.springframework.cache.annotation.Cacheable;
 
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -61,6 +61,7 @@ public class IncidentSearchService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "search-results", key = "#rawQuery + '-' + #location.stateCode + '-' + #location.districtCode")
     public IncidentSearchResponse search(
             String rawQuery,
             LocationContext location

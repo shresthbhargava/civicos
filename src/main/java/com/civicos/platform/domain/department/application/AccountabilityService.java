@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,7 +18,9 @@ public class AccountabilityService {
     private final DepartmentRepository departmentRepository;
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "accountability-chains", key = "#departmentId")
     public List<AccountabilityNode> getChain(Long departmentId) {
+
         log.debug("Fetching accountability chain for departmentId={}", departmentId);
 
         List<Object[]> rows = departmentRepository
@@ -35,4 +38,5 @@ public class AccountabilityService {
                 )
                 .collect(Collectors.toList());
     }
+
 }
