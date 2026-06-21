@@ -14,13 +14,16 @@ public class SearchEventProducer {
     private final KafkaTemplate<String, SearchEvent> kafkaTemplate;
 
     public void publishSearchEvent(SearchEvent event) {
-        kafkaTemplate.send(TOPIC, event.getQuery(), event)
-                .whenComplete((result, ex) -> {
-                    if (ex != null) {
-                        log.warn("Failed to publish search event: {}", ex.getMessage());
-                    } else {
-                        log.debug("Published search event for query: {}", event.getQuery());
-                    }
-                });
-    }
-}
+        try {
+            kafkaTemplate.send(TOPIC, event.getQuery(), event)
+                    .whenComplete((result, ex) -> {
+                        if (ex != null) {
+                            log.warn("Failed to publish search event: {}", ex.getMessage());
+                        } else {
+                            log.debug("Published search event for query: {}", event.getQuery());
+                        }
+                    });
+        } catch (Exception e) {
+            log.warn("Kafka unavailable, skipping search event: {}", e.getMessage());
+        }
+    }}

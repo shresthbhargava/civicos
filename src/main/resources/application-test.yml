@@ -8,6 +8,12 @@ spring:
     enabled: true
     locations: classpath:db/migration
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    autoconfigure:
+      exclude:
+        - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+
 logging:
   level:
     com.civicos: DEBUG
