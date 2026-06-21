@@ -7,6 +7,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import com.civicos.platform.common.kafka.SearchEventProducer;
+
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+
+import org.springframework.kafka.core.KafkaTemplate;
+
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -21,4 +27,9 @@ public abstract class AbstractIntegrationTest {
                     .withDatabaseName("civicos_test")
                     .withUsername("civicos")
                     .withPassword("civicos");
+    @MockitoBean
+    private KafkaTemplate<String,Object> kafkaTemplate;
+
+    @MockitoBean
+    private SearchEventProducer searchEventProducer;
 }
