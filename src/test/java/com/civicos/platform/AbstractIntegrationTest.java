@@ -17,7 +17,7 @@ public abstract class AbstractIntegrationTest {
     @Container
     @ServiceConnection
     static final PostgreSQLContainer<?> postgres =
-            new PostgreSQLContainer<>("postgres:16-alpine")
+            new PostgreSQLContainer<>("pgvector/pgvector:pg16")
                     .withDatabaseName("civicos_test")
                     .withUsername("civicos")
                     .withPassword("civicos");
