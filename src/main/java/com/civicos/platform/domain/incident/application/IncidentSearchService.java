@@ -18,6 +18,9 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.civicos.platform.common.kafka.SearchEventProducer;
+import com.civicos.platform.common.kafka.SearchEvent;
+import java.time.Instant;
 
 @Slf4j
 @Service
@@ -29,6 +32,7 @@ public class IncidentSearchService {
     private final OfficialService officialService;
     private final ActRepository actRepository;
     private final EmbeddingService embeddingService;
+    private final SearchEventProducer searchEventProducer;
     /**
      * Column indexes from native SQL query.
      */
@@ -75,7 +79,6 @@ public class IncidentSearchService {
 
         String[] tokenArray = queryTokens.toArray(new String[0]);
 
-        // Try keyword search first
         List<Object[]> rows = incidentCategoryRepository.searchByKeywordsAndLocation(
                 tokenArray,
                 location.getStateCode(),
@@ -84,7 +87,6 @@ public class IncidentSearchService {
 
         log.debug("Keyword search returned {} rows", rows.size());
 
-        // Fall back to semantic search if no keyword results
         if (rows.isEmpty()) {
             log.info("No keyword results — falling back to semantic search");
             rows = semanticSearch(rawQuery, location.getStateCode());
@@ -96,11 +98,24 @@ public class IncidentSearchService {
                         .map(row -> buildMatchFromRow(row, queryTokens))
                         .collect(Collectors.toList());
 
-        return IncidentSearchResponse.builder()
+        IncidentSearchResponse response = IncidentSearchResponse.builder()
                 .query(rawQuery)
                 .matchType(rows.isEmpty() ? "NO_MATCH" : "KEYWORD")
                 .matches(matches)
                 .build();
+
+        // Publish to Kafka (only on cache miss — cached calls won't reach here)
+        searchEventProducer.publishSearchEvent(SearchEvent.builder()
+                .query(rawQuery)
+                .stateCode(location.getStateCode())
+                .districtCode(location.getDistrictCode())
+                .matchType(response.getMatchType())
+                .matchCount(matches.size())
+                .topCategory(matches.isEmpty() ? null : matches.get(0).getCategoryCode())
+                .timestamp(Instant.now())
+                .build());
+
+        return response;
     }
 
     private List<Object[]> semanticSearch(String query, String stateCode) {

@@ -28,6 +28,7 @@ dependencies {
     // Redis
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-cache")
+    implementation("org.springframework.kafka:spring-kafka")
     
 // pgvector JDBC support
     implementation("com.pgvector:pgvector:0.1.6")
