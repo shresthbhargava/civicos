@@ -18,6 +18,8 @@ public class CorsConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", config);
+        source.registerCorsConfiguration("/swagger-ui/**", config);
+        source.registerCorsConfiguration("/v3/api-docs/**", config);
 
         return new CorsFilter(source);
     }

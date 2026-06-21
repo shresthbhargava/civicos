@@ -6,17 +6,18 @@ import com.civicos.platform.common.response.ApiResponse;
 import com.civicos.platform.domain.incident.application.IncidentCategoryResponse;
 import com.civicos.platform.domain.incident.application.IncidentSearchResponse;
 import com.civicos.platform.domain.incident.application.IncidentSearchService;
+import com.civicos.platform.domain.incident.application.LocationContext;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import com.civicos.platform.domain.incident.application.LocationContext;
+
+@Tag(name = "Incident Search", description = "Search for civic incidents and find accountable departments")
 @RestController
 @RequestMapping("/api/v1/incidents")
 @RequiredArgsConstructor
@@ -24,22 +25,26 @@ public class IncidentSearchController {
 
     private final IncidentSearchService incidentSearchService;
 
+    @Operation(summary = "Get all incident categories")
     @GetMapping("/categories")
     public ResponseEntity<ApiResponse<List<IncidentCategoryResponse>>> getAllCategories(
             HttpServletRequest request) {
-
-        List<IncidentCategoryResponse> response =
-                incidentSearchService.getAllCategories();
-
         return ResponseEntity.ok(
-                ApiResponse.success(response, request)
+                ApiResponse.success(incidentSearchService.getAllCategories(), request)
         );
     }
 
+    @Operation(
+            summary = "Search incidents",
+            description = "Search for civic incidents by keyword. Returns responsible department, accountability chain, current officials, relevant acts and citizen actions."
+    )
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<IncidentSearchResponse>> search(
+            @Parameter(description = "Search query e.g. 'exam leak', 'water supply'")
             @RequestParam String query,
+            @Parameter(description = "State code e.g. MH, DL, KA, TN, UP")
             @RequestParam(required = false) String stateCode,
+            @Parameter(description = "District code")
             @RequestParam(required = false) String districtCode,
             HttpServletRequest request) {
 
@@ -52,7 +57,6 @@ public class IncidentSearchController {
 
         LocationContext location = resolveLocation(stateCode, districtCode);
         IncidentSearchResponse response = incidentSearchService.search(query, location);
-
         return ResponseEntity.ok(ApiResponse.success(response, request));
     }
 
