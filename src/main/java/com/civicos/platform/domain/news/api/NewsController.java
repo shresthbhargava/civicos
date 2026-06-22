@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.context.annotation.Lazy;
 
 @Tag(name = "News", description = "Real-time civic news from India")
 @RestController
@@ -21,6 +22,7 @@ public class NewsController {
 
     private final NewsArticleRepository newsArticleRepository;
 
+    @Lazy
     private final NewsFetchService newsFetchService;
 
     @Operation(summary = "Manually trigger news fetch")
