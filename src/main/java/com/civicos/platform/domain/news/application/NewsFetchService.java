@@ -25,6 +25,7 @@ public class NewsFetchService {
     private final NewsArticleRepository newsArticleRepository;
     private final ObjectMapper objectMapper;
 
+    private final NewsFetchService newsFetchService;
     @Value("${newsdata.api-key}")
     private String apiKey;
 

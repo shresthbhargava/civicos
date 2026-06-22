@@ -1,6 +1,7 @@
 package com.civicos.platform.domain.news.api;
 
 import com.civicos.platform.common.response.ApiResponse;
+import com.civicos.platform.domain.news.application.NewsFetchService;
 import com.civicos.platform.domain.news.domain.NewsArticle;
 import com.civicos.platform.domain.news.domain.NewsArticleRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +21,14 @@ public class NewsController {
 
     private final NewsArticleRepository newsArticleRepository;
 
+    private final NewsFetchService newsFetchService;
+
+    @Operation(summary = "Manually trigger news fetch")
+    @PostMapping("/fetch")
+    public ResponseEntity<ApiResponse<String>> fetchNow(HttpServletRequest request) {
+        newsFetchService.fetchLatestNews();
+        return ResponseEntity.ok(ApiResponse.success("News fetch triggered", request));
+    }
     @Operation(summary = "Get latest civic news")
     @GetMapping("/latest")
     public ResponseEntity<ApiResponse<List<NewsArticle>>> getLatest(
