@@ -29,6 +29,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("org.springframework.kafka:spring-kafka")
+    implementation("org.springframework.boot:spring-boot-starter-batch")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
     
 // pgvector JDBC support

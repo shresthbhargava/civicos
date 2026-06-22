@@ -103,3 +103,6 @@ kafka:
     properties:
       spring.json.trusted.packages: "com.civicos.platform.common.kafka"
       spring.json.value.default.type: "com.civicos.platform.common.kafka.SearchEvent"
+
+newsdata:
+  api-key: ${NEWSDATA_API_KEY:pub_f80fdd6dec5f4e6995de838fcff664c2}
