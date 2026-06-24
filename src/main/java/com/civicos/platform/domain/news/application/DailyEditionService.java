@@ -37,10 +37,15 @@ public class DailyEditionService {
 
     @Scheduled(cron = "0 0 6 * * *")
     public void generateDailyEdition() {
-        LocalDate today = LocalDate.now();
-        log.info("Generating daily edition for {}", today);
+        generateDailyEdition(false);
+    }
 
-        if (dailyEditionRepository.findByEditionDate(today).isPresent()) {
+    public void generateDailyEdition(boolean force) {
+        LocalDate today = LocalDate.now();
+        log.info("Generating daily edition for {} (force={})", today, force);
+
+        var existingOpt = dailyEditionRepository.findByEditionDate(today);
+        if (existingOpt.isPresent() && !force) {
             log.info("Daily edition for {} already exists", today);
             return;
         }
@@ -82,12 +87,11 @@ public class DailyEditionService {
             stories.add(story);
         }
 
-        DailyEdition edition = DailyEdition.builder()
-                .editionDate(today)
-                .headline(articles.get(0).getTitle().toUpperCase())
-                .stories(stories)
-                .generatedAt(LocalDateTime.now())
-                .build();
+        DailyEdition edition = existingOpt.orElseGet(DailyEdition::new);
+        edition.setEditionDate(today);
+        edition.setHeadline(articles.get(0).getTitle().toUpperCase());
+        edition.setStories(stories);
+        edition.setGeneratedAt(LocalDateTime.now());
 
         dailyEditionRepository.save(edition);
         log.info("Daily edition generated with {} stories", stories.size());

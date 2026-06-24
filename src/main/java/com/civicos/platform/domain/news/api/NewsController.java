@@ -60,8 +60,10 @@ public class NewsController {
     @Operation(summary = "Manually generate today's edition")
     @PostMapping("/edition/generate")
     public ResponseEntity<ApiResponse<String>> generateEdition(
+            @RequestParam(defaultValue = "false") boolean force,
             HttpServletRequest request) {
-        dailyEditionService.generateDailyEdition();
-        return ResponseEntity.ok(ApiResponse.success("Edition generation triggered", request));
+        dailyEditionService.generateDailyEdition(force);
+        return ResponseEntity.ok(ApiResponse.success(
+                force ? "Edition force-regenerated" : "Edition generation triggered", request));
     }
 }
