@@ -4,6 +4,7 @@ import com.civicos.platform.domain.department.application.AccountabilityNode;
 import com.civicos.platform.domain.department.application.AccountabilityService;
 import com.civicos.platform.domain.incident.domain.IncidentCategoryRepository;
 import com.civicos.platform.common.ai.EmbeddingService;
+import com.civicos.platform.domain.news.application.DailyEditionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ public class IncidentSearchService {
     private final ActRepository actRepository;
     private final EmbeddingService embeddingService;
     private final SearchEventProducer searchEventProducer;
+    private final DailyEditionService dailyEditionService;
     /**
      * Column indexes from native SQL query.
      */
