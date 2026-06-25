@@ -4,13 +4,17 @@ import com.civicos.platform.domain.department.application.AccountabilityNode;
 import com.civicos.platform.domain.department.domain.Department;
 import com.civicos.platform.domain.official.application.OfficialResponse;
 import com.civicos.platform.domain.act.application.ActResponse;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class IncidentSearchResponse {
 
     private String query;
@@ -19,6 +23,8 @@ public class IncidentSearchResponse {
 
     @Getter
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class IncidentMatch {
 
         private Long categoryId;
@@ -34,6 +40,8 @@ public class IncidentSearchResponse {
 
     @Getter
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class DepartmentSummary {
 
         private Long id;

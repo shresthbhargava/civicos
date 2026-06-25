@@ -81,7 +81,8 @@ public class DailyEditionService {
                     story.put("citizenActions", match.getCitizenActions());
                 }
             } catch (Exception e) {
-                log.debug("Could not find accountability for: {}", article.getTitle());
+                log.warn("Could not find accountability for: {} - {}",
+                        article.getTitle(), e.getMessage(), e);
             }
 
             stories.add(story);

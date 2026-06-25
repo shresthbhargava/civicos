@@ -1,11 +1,15 @@
 package com.civicos.platform.domain.act.application;
 
 import com.civicos.platform.domain.act.domain.Act;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Value;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Value
+@Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ActResponse {
 
     String name;

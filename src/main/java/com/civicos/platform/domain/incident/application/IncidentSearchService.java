@@ -183,10 +183,21 @@ public class IncidentSearchService {
                 )
                 .collect(Collectors.toList());
 
-        List<AccountabilityNode> chain =
-                accountabilityService.getChain(deptId);
-        List<OfficialResponse> officials =
-                officialService.getCurrentOfficials(deptId);
+        List<AccountabilityNode> chain = List.of();
+        try {
+            chain = accountabilityService.getChain(deptId);
+        } catch (Exception e) {
+            log.warn("Failed to fetch accountability chain for deptId={}: {}",
+                    deptId, e.getMessage());
+        }
+
+        List<OfficialResponse> officials = List.of();
+        try {
+            officials = officialService.getCurrentOfficials(deptId);
+        } catch (Exception e) {
+            log.warn("Failed to fetch officials for deptId={}: {}",
+                    deptId, e.getMessage());
+        }
 
         IncidentSearchResponse.DepartmentSummary deptSummary =
                 IncidentSearchResponse.DepartmentSummary.builder()
@@ -196,10 +207,19 @@ public class IncidentSearchService {
                         .jurisdictionLevel(deptJurisdictionLevel)
                         .currentOfficials(officials)
                         .build();
-        List<ActResponse> relevantActs = actRepository.findByCategoryId(categoryId)
-                .stream()
-                .map(ActResponse::from)
-                .collect(Collectors.toList());
+
+        List<ActResponse> relevantActs = List.of();
+        try {
+            var acts = actRepository.findByCategoryId(categoryId);
+            if (acts != null) {
+                relevantActs = acts.stream()
+                        .map(ActResponse::from)
+                        .collect(Collectors.toList());
+            }
+        } catch (Exception e) {
+            log.warn("Failed to fetch acts for categoryId={}: {}",
+                    categoryId, e.getMessage());
+        }
 
         return IncidentSearchResponse.IncidentMatch.builder()
                 .categoryId(categoryId)
