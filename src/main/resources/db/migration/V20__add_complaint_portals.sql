@@ -1,0 +1,24 @@
+ALTER TABLE departments ADD COLUMN IF NOT EXISTS complaint_portal_url VARCHAR(500);
+COMMENT ON COLUMN departments.complaint_portal_url IS 'Direct URL for citizens to file complaints with this department';
+
+UPDATE departments SET complaint_portal_url = 'https://nta.ac.in/complaint' WHERE code = 'NTA_CENTRAL';
+UPDATE departments SET complaint_portal_url = 'https://grievance.ugc.ac.in' WHERE code = 'UGC_CENTRAL';
+UPDATE departments SET complaint_portal_url = 'https://pgportal.gov.in' WHERE code = 'MIN_EDUCATION_CENTRAL';
+UPDATE departments SET complaint_portal_url = 'https://pgportal.gov.in' WHERE code = 'MIN_HEALTH_CENTRAL';
+UPDATE departments SET complaint_portal_url = 'https://pgportal.gov.in' WHERE code = 'MIN_RURAL_CENTRAL';
+UPDATE departments SET complaint_portal_url = 'https://parivahan.gov.in' WHERE code = 'MORTH_CENTRAL';
+UPDATE departments SET complaint_portal_url = 'https://fssai.gov.in/complaints' WHERE code = 'FSSAI_CENTRAL';
+UPDATE departments SET complaint_portal_url = 'https://powermin.gov.in/grievance' WHERE code = 'MIN_POWER_CENTRAL';
+UPDATE departments SET complaint_portal_url = 'https://pgportal.gov.in' WHERE code = 'MIN_HOUSING_CENTRAL';
+UPDATE departments SET complaint_portal_url = 'https://cvc.gov.in/complaint' WHERE code = 'CVC_CENTRAL';
+UPDATE departments SET complaint_portal_url = 'https://consumerhelpline.gov.in' WHERE code = 'MIN_CONSUMER_CENTRAL';
+UPDATE departments SET complaint_portal_url = 'https://cpcb.nic.in/complaint' WHERE code = 'MIN_ENVIRONMENT_CENTRAL';
+UPDATE departments SET complaint_portal_url = 'https://www.dot.gov.in/grievance' WHERE code = 'DOT_CENTRAL';
+UPDATE departments SET complaint_portal_url = 'https://www.nmc.org.in/grievance' WHERE code = 'NMC_CENTRAL';
+UPDATE departments SET complaint_portal_url = 'https://epfigms.gov.in' WHERE code = 'MIN_LABOUR_CENTRAL';
+UPDATE departments SET complaint_portal_url = 'https://cybercrime.gov.in' WHERE code = 'MEITY_CENTRAL';
+UPDATE departments SET complaint_portal_url = 'https://cercind.gov.in/complaint' WHERE code = 'CERC_CENTRAL';
+UPDATE departments SET complaint_portal_url = 'https://www.maharashtra.gov.in/grievance' WHERE code IN ('WATER_STATE_MH', 'EDUCATION_BOARD_STATE_MH', 'PWD_STATE_MH');
+UPDATE departments SET complaint_portal_url = 'https://www.delhijalboard.in/complaint' WHERE code = 'WATER_STATE_DL';
+UPDATE departments SET complaint_portal_url = 'https://www.edudel.nic.in/grievance' WHERE code = 'EDUCATION_STATE_DL';
+UPDATE departments SET complaint_portal_url = 'https://pwd.delhi.gov.in/grievance' WHERE code = 'PWD_STATE_DL';

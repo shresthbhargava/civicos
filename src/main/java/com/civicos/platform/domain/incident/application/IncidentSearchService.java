@@ -35,6 +35,7 @@ public class IncidentSearchService {
     private final EmbeddingService embeddingService;
     private final SearchEventProducer searchEventProducer;
     private final DailyEditionService dailyEditionService;
+
     /**
      * Column indexes from native SQL query.
      */
@@ -55,11 +56,12 @@ public class IncidentSearchService {
         int DEPT_CODE = 9;
         int DEPT_NAME = 10;
         int DEPT_JURISDICTION = 11;
+        int DEPT_COMPLAINT_URL = 12;
+        int DEPT_WEBSITE_URL = 13;
     }
 
     @Transactional(readOnly = true)
     public List<IncidentCategoryResponse> getAllCategories() {
-
         return incidentCategoryRepository.findAll()
                 .stream()
                 .map(IncidentCategoryResponse::from)
@@ -106,7 +108,6 @@ public class IncidentSearchService {
                 .matches(matches)
                 .build();
 
-        // Publish to Kafka (only on cache miss — cached calls won't reach here)
         searchEventProducer.publishSearchEvent(SearchEvent.builder()
                 .query(rawQuery)
                 .stateCode(location.getStateCode())
@@ -123,63 +124,33 @@ public class IncidentSearchService {
     private List<Object[]> semanticSearch(String query, String stateCode) {
         try {
             String embedding = embeddingService.getEmbedding(query);
-            return incidentCategoryRepository.searchByEmbedding(embedding, stateCode);
+            return incidentCategoryRepository.searchByEmbedding(embedding, stateCode, 0.80);
         } catch (Exception e) {
             log.warn("Semantic search failed: {}", e.getMessage());
             return List.of();
         }
     }
 
-    private String toPgVectorString(float[] embedding) {
-        StringBuilder sb = new StringBuilder("[");
-        for (int i = 0; i < embedding.length; i++) {
-            sb.append(embedding[i]);
-            if (i < embedding.length - 1) sb.append(",");
-        }
-        sb.append("]");
-        return sb.toString();
-    }
-
     private IncidentSearchResponse.IncidentMatch buildMatchFromRow(
             Object[] row,
             List<String> queryTokens
     ) {
-
-        log.debug("ROW = {}", Arrays.toString(row));
-
-        Long categoryId =
-                ((Number) row[Columns.CATEGORY_ID]).longValue();
-
-        String categoryName =
-                (String) row[Columns.CATEGORY_NAME];
-
-        String categoryCode =
-                (String) row[Columns.CATEGORY_CODE];
-
-        String[] keywords =
-                extractStringArray(row[Columns.KEYWORDS]);
-
-        String[] citizenActions =
-                extractStringArray(row[Columns.CITIZEN_ACTIONS]);
-
-        Long deptId =
-                ((Number) row[Columns.DEPT_ID]).longValue();
-
-        String deptCode =
-                (String) row[Columns.DEPT_CODE];
-
-        String deptName =
-                (String) row[Columns.DEPT_NAME];
-
-        String deptJurisdictionLevel =
-                String.valueOf(row[Columns.DEPT_JURISDICTION]);
+        Long categoryId = ((Number) row[Columns.CATEGORY_ID]).longValue();
+        String categoryName = (String) row[Columns.CATEGORY_NAME];
+        String categoryCode = (String) row[Columns.CATEGORY_CODE];
+        String[] keywords = extractStringArray(row[Columns.KEYWORDS]);
+        String[] citizenActions = extractStringArray(row[Columns.CITIZEN_ACTIONS]);
+        Long deptId = ((Number) row[Columns.DEPT_ID]).longValue();
+        String deptCode = (String) row[Columns.DEPT_CODE];
+        String deptName = (String) row[Columns.DEPT_NAME];
+        String deptJurisdictionLevel = String.valueOf(row[Columns.DEPT_JURISDICTION]);
+        String deptComplaintUrl = row.length > Columns.DEPT_COMPLAINT_URL ? (String) row[Columns.DEPT_COMPLAINT_URL] : null;
+        String deptWebsiteUrl = row.length > Columns.DEPT_WEBSITE_URL ? (String) row[Columns.DEPT_WEBSITE_URL] : null;
 
         List<String> matchedKeywords = Arrays.stream(keywords)
                 .filter(keyword ->
                         queryTokens.stream()
-                                .anyMatch(token ->
-                                        keyword.toLowerCase().contains(token)
-                                )
+                                .anyMatch(token -> keyword.toLowerCase().contains(token))
                 )
                 .collect(Collectors.toList());
 
@@ -187,16 +158,14 @@ public class IncidentSearchService {
         try {
             chain = accountabilityService.getChain(deptId);
         } catch (Exception e) {
-            log.warn("Failed to fetch accountability chain for deptId={}: {}",
-                    deptId, e.getMessage());
+            log.warn("Failed to fetch accountability chain for deptId={}: {}", deptId, e.getMessage());
         }
 
         List<OfficialResponse> officials = List.of();
         try {
             officials = officialService.getCurrentOfficials(deptId);
         } catch (Exception e) {
-            log.warn("Failed to fetch officials for deptId={}: {}",
-                    deptId, e.getMessage());
+            log.warn("Failed to fetch officials for deptId={}: {}", deptId, e.getMessage());
         }
 
         IncidentSearchResponse.DepartmentSummary deptSummary =
@@ -205,6 +174,8 @@ public class IncidentSearchService {
                         .code(deptCode)
                         .name(deptName)
                         .jurisdictionLevel(deptJurisdictionLevel)
+                        .complaintPortalUrl(deptComplaintUrl)
+                        .websiteUrl(deptWebsiteUrl)
                         .currentOfficials(officials)
                         .build();
 
@@ -217,8 +188,7 @@ public class IncidentSearchService {
                         .collect(Collectors.toList());
             }
         } catch (Exception e) {
-            log.warn("Failed to fetch acts for categoryId={}: {}",
-                    categoryId, e.getMessage());
+            log.warn("Failed to fetch acts for categoryId={}: {}", categoryId, e.getMessage());
         }
 
         return IncidentSearchResponse.IncidentMatch.builder()
@@ -234,17 +204,8 @@ public class IncidentSearchService {
     }
 
     private String[] extractStringArray(Object rawValue) {
-
-        if (rawValue == null) {
-            return new String[0];
-        }
-
-        // PostgreSQL/Hibernate already returned String[]
-        if (rawValue instanceof String[] stringArray) {
-            return stringArray;
-        }
-
-        // fallback for SQL Array
+        if (rawValue == null) return new String[0];
+        if (rawValue instanceof String[] stringArray) return stringArray;
         try {
             if (rawValue instanceof java.sql.Array sqlArray) {
                 return (String[]) sqlArray.getArray();
@@ -252,17 +213,11 @@ public class IncidentSearchService {
         } catch (SQLException e) {
             log.warn("Failed to extract array value", e);
         }
-
         return new String[0];
     }
 
     private List<String> tokenize(String query) {
-
-        return Arrays.stream(
-                        query.toLowerCase()
-                                .trim()
-                                .split("\\s+")
-                )
+        return Arrays.stream(query.toLowerCase().trim().split("\\s+"))
                 .filter(token -> token.length() > 2)
                 .distinct()
                 .collect(Collectors.toList());

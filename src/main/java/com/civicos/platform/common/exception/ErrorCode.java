@@ -13,9 +13,15 @@ public enum ErrorCode {
     // Domain - Incident
     INCIDENT_NOT_FOUND("INCIDENT_NOT_FOUND", "Incident not found", HttpStatus.NOT_FOUND),
 
+
     // Domain - Department
     DEPARTMENT_NOT_FOUND("DEPARTMENT_NOT_FOUND", "Department not found", HttpStatus.NOT_FOUND),
-    DEPARTMENT_ALREADY_EXISTS("DEPARTMENT_ALREADY_EXISTS", "Department already exists", HttpStatus.CONFLICT);
+    DEPARTMENT_ALREADY_EXISTS("DEPARTMENT_ALREADY_EXISTS", "Department already exists", HttpStatus.CONFLICT),
+
+    //Domain-Complaint
+    COMPLAINT_NOT_FOUND("COMPLAINT_NOT_FOUND","Complaint not found",HttpStatus.NOT_FOUND),
+    INVALID_STATUS_TRANSITION("INVALID_STATUS_TRANSITION","Invalid status transition",HttpStatus.BAD_REQUEST);
+
 
     private final String code;
     private final String defaultMessage;

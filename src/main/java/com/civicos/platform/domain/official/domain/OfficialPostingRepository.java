@@ -24,6 +24,8 @@ public interface OfficialPostingRepository extends JpaRepository<OfficialPosting
             @Param("asOfDate") LocalDate asOfDate
     );
 
+    List<OfficialPosting> findByDepartment_IdOrderByStartDateDesc(Long departmentId);
+
     default List<OfficialPosting> findCurrentPostings(Long departmentId) {
         return findActivePostings(departmentId, LocalDate.now());
     }

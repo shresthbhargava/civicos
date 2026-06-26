@@ -6,10 +6,12 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface IncidentCategoryRepository
         extends JpaRepository<IncidentCategory, Long> {
+    Optional<IncidentCategory> findByCode(String code);
 
     @Query(value = """
 SELECT DISTINCT ON (ic.id)
@@ -28,7 +30,9 @@ SELECT DISTINCT ON (ic.id)
     COALESCE(
         d_specific.jurisdiction_level,
         d_default.jurisdiction_level
-    ) as dept_jurisdiction
+    ) as dept_jurisdiction,
+    COALESCE(d_specific.complaint_portal_url, d_default.complaint_portal_url) as dept_complaint_url,
+    COALESCE(d_specific.website_url, d_default.website_url) as dept_website_url
 
 FROM incident_categories ic
 
@@ -71,6 +75,7 @@ ORDER BY
     INNER JOIN incident_category_departments icd ON icd.incident_category_id = ic.id
     INNER JOIN departments d ON d.id = icd.department_id
     WHERE ic.embedding IS NOT NULL
+    AND 1 - (ic.embedding <=> CAST(:embedding AS vector)) > :threshold
     AND (
         :stateCode IS NULL 
         OR d.state_code = :stateCode 
@@ -81,6 +86,7 @@ ORDER BY
     """, nativeQuery = true)
     List<Object[]> searchByEmbedding(
             @Param("embedding") String embedding,
-            @Param("stateCode") String stateCode
+            @Param("stateCode") String stateCode,
+            @Param("threshold") double threshold
     );
 }

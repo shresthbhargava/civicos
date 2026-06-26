@@ -17,6 +17,14 @@ import org.springframework.cache.annotation.Cacheable;
 @RequiredArgsConstructor
 public class OfficialService {
 
+    public List<OfficialResponse> getPostingHistory(Long departmentId) {
+        return officialPostingRepository
+                .findByDepartment_IdOrderByStartDateDesc(departmentId)
+                .stream()
+                .map(OfficialResponse::from)
+                .toList();
+    }
+
     private final OfficialPostingRepository officialPostingRepository;
 
     @Transactional(readOnly = true)

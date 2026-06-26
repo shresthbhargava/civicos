@@ -51,4 +51,15 @@ public class OfficialController {
         List<OfficialResponse> officials = officialService.getOfficialsAsOf(departmentId, queryDate);
         return ResponseEntity.ok(ApiResponse.success(officials, request));
     }
+    @Operation(summary = "Get posting history", description = "Returns all postings (past and current) for a department, ordered by date")
+    @GetMapping("/{code}/officials/history")
+    public ResponseEntity<ApiResponse<List<OfficialResponse>>> getPostingHistory(
+            @PathVariable String code,
+            HttpServletRequest request) {
+        Long departmentId = departmentRepository.findByCode(code)
+                .orElseThrow(() -> new CivicOSException(ErrorCode.DEPARTMENT_NOT_FOUND, "Department not found: " + code))
+                .getId();
+        List<OfficialResponse> history = officialService.getPostingHistory(departmentId);
+        return ResponseEntity.ok(ApiResponse.success(history, request));
+    }
 }

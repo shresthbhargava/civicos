@@ -48,17 +48,18 @@ public class IncidentSearchResponse {
         private String code;
         private String name;
         private String jurisdictionLevel;
+        private String complaintPortalUrl;
+        private String websiteUrl;
         private List<OfficialResponse> currentOfficials;
 
         public static DepartmentSummary from(Department department) {
-
             return DepartmentSummary.builder()
                     .id(department.getId())
                     .code(department.getCode())
                     .name(department.getName())
-                    .jurisdictionLevel(
-                            department.getJurisdictionLevel().name()
-                    )
+                    .jurisdictionLevel(department.getJurisdictionLevel().name())
+                    .complaintPortalUrl(department.getComplaintPortalUrl())
+                    .websiteUrl(department.getWebsiteUrl())
                     .build();
         }
     }

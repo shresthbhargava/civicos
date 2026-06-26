@@ -46,6 +46,8 @@ public class Department {
 
     @Column(name = "website_url")
     private String websiteUrl;
+    @Column(name = "complaint_portal_url", length = 500)
+    private String complaintPortalUrl;
 
     @Column(name = "contact_email")
     private String contactEmail;

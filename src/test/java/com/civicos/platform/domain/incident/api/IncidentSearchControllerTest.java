@@ -102,7 +102,7 @@ class IncidentSearchControllerTest extends AbstractIntegrationTest {
     void search_noMatch_returnsEmptyList() {
         ApiResponse<IncidentSearchResponse> response = webTestClient
                 .get()
-                .uri("/api/v1/incidents/search?query=road+pothole")
+                .uri("/api/v1/incidents/search?query=quantum+physics")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(new ParameterizedTypeReference<
