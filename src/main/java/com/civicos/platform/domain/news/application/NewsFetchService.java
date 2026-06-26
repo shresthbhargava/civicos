@@ -39,7 +39,7 @@ public class NewsFetchService {
                     "apikey=" + apiKey +
                     "&country=in" +
                     "&language=en" +
-                    "&category=politics,governance,top";
+                    "&category=politics,nation";
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
