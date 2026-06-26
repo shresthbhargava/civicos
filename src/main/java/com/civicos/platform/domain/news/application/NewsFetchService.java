@@ -39,8 +39,7 @@ public class NewsFetchService {
                     "apikey=" + apiKey +
                     "&country=in" +
                     "&language=en" +
-                    "&q=government+ministry+accountability+RTI+audit" +
-                    "&category=politics";
+                    "&category=politics,governance,top";
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
