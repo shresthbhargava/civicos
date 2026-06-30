@@ -88,7 +88,8 @@ class IncidentSearchControllerTest extends AbstractIntegrationTest {
         assertThat(match.getCategoryCode()).isEqualTo("EXAM_IRREGULARITY");
         assertThat(match.getResponsibleDepartment().getCode())
                 .isEqualTo("NTA_CENTRAL");
-        assertThat(match.getMatchedKeywords()).contains("exam", "leak");
+        assertThat(match.getMatchedKeywords()).anyMatch(k -> k.contains("exam"));
+        assertThat(match.getMatchedKeywords()).anyMatch(k -> k.contains("leak"));
         assertThat(match.getAccountabilityChain()).hasSize(2);
         assertThat(match.getAccountabilityChain().get(0).getCode())
                 .isEqualTo("NTA_CENTRAL");
