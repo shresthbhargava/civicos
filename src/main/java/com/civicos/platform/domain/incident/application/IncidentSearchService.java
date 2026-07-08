@@ -2,6 +2,7 @@ package com.civicos.platform.domain.incident.application;
 
 import com.civicos.platform.domain.department.application.AccountabilityNode;
 import com.civicos.platform.domain.department.application.AccountabilityService;
+import com.civicos.platform.domain.incident.domain.IncidentCategory;
 import com.civicos.platform.domain.incident.domain.IncidentCategoryRepository;
 import com.civicos.platform.common.ai.EmbeddingService;
 import com.civicos.platform.domain.news.application.DailyEditionService;
@@ -14,10 +15,12 @@ import com.civicos.platform.domain.official.application.OfficialResponse;
 import com.civicos.platform.domain.act.domain.ActRepository;
 import com.civicos.platform.domain.act.application.ActResponse;
 import org.springframework.cache.annotation.Cacheable;
+import com.civicos.platform.common.ai.LlmClassificationService;
 
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import com.civicos.platform.common.kafka.SearchEventProducer;
 import com.civicos.platform.common.kafka.SearchEvent;
@@ -35,7 +38,7 @@ public class IncidentSearchService {
     private final EmbeddingService embeddingService;
     private final SearchEventProducer searchEventProducer;
     private final DailyEditionService dailyEditionService;
-
+    private final LlmClassificationService llmClassificationService;
     /**
      * Column indexes from native SQL query.
      */
@@ -95,6 +98,12 @@ public class IncidentSearchService {
             log.info("No keyword results — falling back to semantic search");
             rows = semanticSearch(rawQuery, location.getStateCode());
             log.debug("Semantic search returned {} rows", rows.size());
+        }
+
+        if (rows.isEmpty()) {
+            log.info("No semantic results — falling back to LLM classification");
+            rows = llmFallback(rawQuery, location.getStateCode());
+            log.debug("LLM fallback returned {} rows", rows.size());
         }
 
         List<IncidentSearchResponse.IncidentMatch> matches =
@@ -215,7 +224,23 @@ public class IncidentSearchService {
         }
         return new String[0];
     }
+    private List<Object[]> llmFallback(String query, String stateCode) {
+        try {
+            Optional<IncidentCategory> categoryOpt = llmClassificationService.classify(query, stateCode);
+            if (categoryOpt.isEmpty()) return List.of();
 
+            IncidentCategory category = categoryOpt.get();
+            log.info("LLM classified '{}' as category {} [{}]", query, category.getName(), category.getCode());
+
+            // Re-run keyword search with category's own keywords to get the full joined row
+            String[] keywords = category.getKeywords() != null ? category.getKeywords() : new String[]{category.getName()};
+            return incidentCategoryRepository.searchByKeywordsAndLocation(keywords, stateCode, null);
+
+        } catch (Exception e) {
+            log.warn("LLM fallback failed: {}", e.getMessage());
+            return List.of();
+        }
+    }
     private List<String> tokenize(String query) {
         return Arrays.stream(query.toLowerCase().trim().split("\\s+"))
                 .filter(token -> token.length() > 2)

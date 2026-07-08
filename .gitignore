@@ -41,3 +41,6 @@ out/
 build/
 frontend/
 build/libs/
+
+application.yaml
+

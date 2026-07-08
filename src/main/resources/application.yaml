@@ -106,3 +106,8 @@ kafka:
 
 newsdata:
   api-key: ${NEWSDATA_API_KEY:pub_f80fdd6dec5f4e6995de838fcff664c2}
+
+groq:
+  api-key: ${GROQ_API_KEY:}
+
+
