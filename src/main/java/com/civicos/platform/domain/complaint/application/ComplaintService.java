@@ -10,16 +10,20 @@ import com.civicos.platform.domain.incident.domain.IncidentCategory;
 import com.civicos.platform.domain.incident.domain.IncidentCategoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.Year;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+
 
 @Slf4j
 @Service
@@ -39,6 +43,10 @@ public class ComplaintService {
     private final IncidentCategoryRepository incidentCategoryRepository;
     private final AtomicLong sequenceCounter = new AtomicLong(0);
 
+    @Lazy
+    @Autowired
+    private ComplaintService self;
+
     @Transactional
     public ComplaintResponse fileComplaint(ComplaintRequest request, String categoryCode, String departmentCode) {
         IncidentCategory category = incidentCategoryRepository.findByCode(categoryCode)
@@ -47,10 +55,8 @@ public class ComplaintService {
         Department department = departmentRepository.findByCode(departmentCode)
                 .orElseThrow(() -> new CivicOSException(ErrorCode.DEPARTMENT_NOT_FOUND, "Department not found: " + departmentCode));
 
-        String trackingId = generateTrackingId();
-
         Complaint complaint = new Complaint();
-        complaint.setTrackingId(trackingId);
+        complaint.setTrackingId(generateTrackingId());
         complaint.setDepartment(department);
         complaint.setIncidentCategory(category);
         complaint.setDescription(request.getDescription());
@@ -60,15 +66,21 @@ public class ComplaintService {
         complaint.setDistrictCode(request.getDistrictCode());
 
         try {
-            complaint = complaintRepository.save(complaint);
-            log.info("Complaint filed: {} for category={} department={}", trackingId, categoryCode, departmentCode);
+            complaint = self.doSaveComplaint(complaint);
+            log.info("Complaint filed: {} for category={} department={}", complaint.getTrackingId(), categoryCode, departmentCode);
         } catch (DataIntegrityViolationException e) {
-            log.warn("Tracking ID collision on {}, retrying", trackingId);
+            log.warn("Tracking ID collision, retrying with new ID");
             complaint.setTrackingId(generateTrackingId());
-            complaint = complaintRepository.save(complaint);
+            complaint = self.doSaveComplaint(complaint);
+            log.info("Complaint filed on retry: {} for category={} department={}", complaint.getTrackingId(), categoryCode, departmentCode);
         }
 
         return ComplaintResponse.from(complaint);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public Complaint doSaveComplaint(Complaint complaint) {
+        return complaintRepository.save(complaint);
     }
 
     @Transactional(readOnly = true)
