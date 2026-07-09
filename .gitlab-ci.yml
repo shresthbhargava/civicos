@@ -1,0 +1,40 @@
+# ── CivicOS CI/CD Pipeline ──
+
+# Built-in security scanners
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Secret-Detection.gitlab-ci.yml
+
+stages:
+  - build
+  - test
+
+cache:
+  paths:
+    - .gradle/caches
+    - .gradle/wrapper
+
+# ── Compile Check ──
+build:
+  stage: build
+  image: gradle:8.5-jdk21
+  before_script:
+    - export GRADLE_USER_HOME=$(pwd)/.gradle
+  script:
+    - ./gradlew compileJava --no-daemon
+  artifacts:
+    paths:
+      - build/
+
+# ── Unit Tests ──
+test:
+  stage: test
+  image: gradle:8.5-jdk21
+  before_script:
+    - export GRADLE_USER_HOME=$(pwd)/.gradle
+  script:
+    - ./gradlew test --no-daemon
+  artifacts:
+    when: always
+    reports:
+      junit: build/test-results/test/*.xml
