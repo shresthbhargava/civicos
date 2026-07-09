@@ -1,177 +1,221 @@
-# CivicOS — AI-Powered Civic Intelligence Platform
+# CivicOS
+AI-Powered Civic Intelligence Platform
 
-> Know who's accountable. Every civic issue. Every Indian citizen.
+Know who's accountable. Every civic issue. Every Indian citizen.
 
-[![Java](https://img.shields.io/badge/Java-21-orange)](https://openjdk.org/projects/jdk/21/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-green)](https://spring.io/projects/spring-boot)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)](https://www.postgresql.org/)
-[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
+**Java 21 · Spring Boot 3.5 · PostgreSQL · React 19 · CI/CD · MIT License**
 
-## What is CivicOS?
+**Live Demo · API Docs · GitLab**
 
-CivicOS is a civic intelligence platform that helps Indian citizens identify accountable government departments, currently posted officials, relevant laws, and exact complaint actions for any civic issue — all from a single plain-language search.
+---
 
-**You type:** `"exam leak"`
+## Overview
 
-**CivicOS returns:**
-- ✅ Responsible department — National Testing Agency
-- ✅ Current official — Pradeep Singh Kharola, Director General (dg@nta.ac.in)
-- ✅ Accountability chain — NTA → Ministry of Education
-- ✅ Relevant law — Right to Information Act, 2005
-- ✅ Citizen actions — exactly where to file complaints
+CivicOS empowers **1.4 billion Indian citizens** to identify exactly who is responsible for any civic issue. A single plain-language search resolves to the accountable government department, the currently posted official with contact details, governing legislation, and actionable steps to file complaints — all in under **200ms**.
 
-## Live Demo
+The platform features **The Civic Record**, a newspaper-style frontend that aggregates real-time civic news with AI-matched accountability data, and an integrated complaint filing system with real-time status tracking.
 
-🌐 **Frontend:** [civicos-frontend.vercel.app](https://civicos-frontend.vercel.app)
+## What a Search Returns
 
-📦 **Frontend repo:** [github.com/shresthbhargava/civicos-frontend](https://github.com/shresthbhargava/civicos-frontend)
+**Input:** `exam leak`
 
-## Features
-
-- **Jurisdiction-aware routing** — automatically resolves district → state → central department fallback
-- **Recursive accountability chain** — PostgreSQL CTEs traverse the full hierarchy from department to ministry
-- **Temporal official postings** — database-enforced exclusion constraints prevent overlapping active postings; point-in-time queries supported
-- **Acts & Laws mapper** — every incident category linked to governing legislation
-- **Citizen action guides** — exact complaint portals, RTI links, grievance channels
-- **Request tracing** — every API response carries a traceId for debugging
-- **Integration tested** — 10 tests running against real PostgreSQL via Testcontainers
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Language | Java 21 |
-| Framework | Spring Boot 3.x |
-| Database | PostgreSQL 16 |
-| Migrations | Flyway |
-| ORM | Spring Data JPA / Hibernate |
-| Testing | JUnit 5, Testcontainers |
-| Containerization | Docker |
-| Build | Gradle |
+| Field | Result |
+|-------|--------|
+| Responsible Department | National Testing Agency |
+| Current Official | Pradeep Singh Kharola, Director General — dg@nta.ac.in |
+| Accountability Chain | NTA → Ministry of Education |
+| Governing Law | Right to Information Act, 2005 |
+| Complaint Portal | RTI Online |
+| Citizen Actions | File RTI → Contact NTA grievance cell → Escalate to MoE |
 
 ## Architecture
 
-```
-React Frontend
-      │
-      ▼
-Spring Boot REST API
-      │
-      ├── Incident Search Service
-      │       ├── Keyword tokenizer
-      │       ├── GIN-indexed search
-      │       └── Jurisdiction resolver
-      │
-      ├── Accountability Service
-      │       └── Recursive CTE chain builder
-      │
-      ├── Official Service
-      │       └── Temporal posting queries
-      │
-      └── Acts Service
-              └── Legislation mapper
-      │
-      ▼
-PostgreSQL 16
-      ├── departments (self-referential hierarchy)
-      ├── incident_categories (GIN-indexed keywords)
-      ├── incident_category_departments (jurisdiction mapping)
-      ├── officials (officer registry)
-      ├── official_postings (temporal with exclusion constraints)
-      ├── acts (legislation registry)
-      └── incident_category_acts (incident-law mapping)
-```
+┌─────────────────────────────────┐
+│ The Civic Record │
+│ React 19 · Vite · Vercel │
+│ │
+│ ┌─────────┐ ┌───────────────┐ │
+│ │ India │ │ Complaint │ │
+│ │ Map │ │ System │ │
+│ │ Search │ │ Tracker │ │
+│ └────┬─────┘ └───────┬───────┘ │
+└───────┼────────────────┼──────────┘
+│ │
+▼ ▼
+┌──────────────────────────────────────────────────────────────┐
+│ Spring Boot 3.5 API │
+│ Render · GitLab CI │
+│ │
+│ ┌────────────────────┐ ┌──────────────────────────────┐ │
+│ │ Incident Search │ │ Complaint Service │ │
+│ │ │ │ │ │
+│ │ 1. Keyword (GIN) │ │ · File complaints │ │
+│ │ 2. Semantic (vec) │ │ · Track by ID │ │
+│ │ 3. LLM (Groq) │ │ · Status timeline │ │
+│ └────────────────────┘ │ · Portal linking │ │
+│ └──────────────────────────────┘ │
+│ ┌────────────────────┐ ┌──────────────────────────────┐ │
+│ │ Accountability │ │ News & Edition │ │
+│ │ Chain (CTE) │ │ │ │
+│ └────────────────────┘ │ · NewsData.io aggregation │ │
+│ ┌────────────────────┐ │ · Daily edition generation │ │
+│ │ Official Postings │ │ · AI-matched departments │ │
+│ │ (Temporal) │ └──────────────────────────────┘ │
+│ └────────────────────┘ │
+│ │
+│ Kafka ──► Search Analytics │
+└──────────────────────────┬───────────────────────────────────┘
+│
+┌────────────┴────────────┐
+│ Supabase PostgreSQL │
+│ │
+│ departments │
+│ officials │
+│ incident_categories │
+│ complaints │
+│ news_articles │
+│ daily_editions │
+│ acts │
+└─────────────────────────┘
+
+## Tech Stack
+
+
+---
+
+## Tech Stack
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| **Frontend** | React 19, Vite | Newspaper-style SPA |
+| **Backend** | Java 21, Spring Boot 3.5 | REST API |
+| **Database** | PostgreSQL 16 (Supabase) | Primary data store |
+| **Migrations** | Flyway | Schema versioning |
+| **ORM** | Spring Data JPA, Hibernate | Data access |
+| **Search** | GIN indexes, pgvector | Keyword + semantic search |
+| **LLM** | Groq (Llama 3.3 70B) | Classification fallback |
+| **Embeddings** | Ollama (nomic-embed-text) | Vector search |
+| **News** | NewsData.io API | Real-time civic news |
+| **Events** | Apache Kafka | Search analytics |
+| **CI/CD** | GitLab | Build, test, SAST, secret detection |
+| **Frontend Hosting** | Vercel | Auto-deploy on push |
+| **Backend Hosting** | Render | Auto-deploy on push |
+| **Testing** | JUnit 5, Testcontainers | Integration tests |
+
+---
+
+## Features
+
+### Three-Tier Search
+
+Every query passes through three layers before returning "no match":
+
+| Tier | Method | Latency | Coverage |
+|------|--------|---------|----------|
+| 1 | GIN-indexed keyword match | ~5ms | Exact keyword hits |
+| 2 | pgvector embedding similarity | ~50ms | Semantic matches |
+| 3 | Groq Llama 3.3 70B classification | ~800ms | Fuzzy / out-of-vocabulary |
+
+### Complaint Lifecycle
+
+SUBMITTED ──► ACKNOWLEDGED ──► IN_PROGRESS ──► RESOLVED
+│ │ │
+└──► REJECTED ◄──┘ └──► REJECTED
+
+
+- Auto-generated tracking IDs (`CIV-YYYY-NNNNN`)
+- Transaction-safe filing with duplicate-key retry (`REQUIRES_NEW` propagation)
+- Real-time tracking with visual status timeline
+- Direct links to official government complaint portals
+
+### Daily News Edition
+
+- Aggregates civic news from 1000+ Indian sources via NewsData.io
+- AI-matches each article to accountable departments
+- Generates a newspaper-style front page with accountability overlay
+- Manual refresh capability from the frontend
+
+---
+
+## API Reference
+
+### Incident Search
+
+```bash
+# Search with jurisdiction context
+curl "https://civicos-r2sf.onrender.com/api/v1/incidents/search?query=exam+leak&stateCode=DL&districtCode=ND"
+
+# Track a complaint
+curl "https://civicos-r2sf.onrender.com/api/v1/complaints/track/CIV-2026-00001"
+
 ## API Endpoints
 
-### Search Incidents
-GET /api/v1/incidents/search?query={query}&stateCode={state}&districtCode={district}
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/incidents/search` | Three-tier incident search |
+| `GET` | `/api/v1/departments/{code}/officials` | Current officials |
+| `GET` | `/api/v1/departments/{code}/officials?asOf={date}` | Point-in-time officials |
+| `POST` | `/api/v1/complaints?categoryCode=X&departmentCode=Y` | File a complaint |
+| `GET` | `/api/v1/complaints/track/{id}` | Track complaint status |
+| `PATCH` | `/api/v1/complaints/{id}/status?newStatus=X` | Update complaint status |
+| `GET` | `/api/v1/news/latest` | Latest civic news |
+| `GET` | `/api/v1/news/edition/today` | Today's front page |
+| `POST` | `/api/v1/news/edition/generate?force=true` | Regenerate edition |
+| `POST` | `/api/v1/news/fetch` | Trigger news fetch |
 
-**Example:**
-```bash
-curl "http://localhost:8080/api/v1/incidents/search?query=exam+leak"
+
+
+## Project Structure
+
+```text
+src/main/java/com/civicos/platform/
+├── common/
+│   ├── ai/                    # EmbeddingService, LlmClassificationService
+│   ├── exception/             # Global exception handling, ErrorCode enum
+│   ├── kafka/                 # SearchEventProducer, SearchEvent
+│   ├── logging/               # Request tracing filter
+│   └── response/              # ApiResponse envelope
+├── config/                    # CORS, security, web configuration
+└── domain/
+    ├── act/                   # Acts & Legislation
+    │   ├── api/               # REST controller
+    │   ├── application/       # ActService, ActResponse
+    │   └── domain/            # Act entity, ActRepository
+    ├── complaint/             # Complaint System
+    │   ├── api/               # ComplaintController
+    │   ├── application/       # ComplaintService, ComplaintResponse
+    │   └── domain/            # Complaint entity, ComplaintRepository
+    ├── department/            # Department Hierarchy
+    │   ├── api/               # DepartmentController
+    │   ├── application/       # AccountabilityService, AccountabilityNode
+    │   └── domain/            # Department entity, recursive CTE queries
+    ├── incident/              # Incident Search
+    │   ├── api/               # IncidentController
+    │   ├── application/       # IncidentSearchService (3-tier)
+    │   └── domain/            # IncidentCategory, GIN/vector queries
+    ├── news/                  # News & Edition
+    │   ├── api/               # NewsController
+    │   ├── application/       # NewsFetchService, DailyEditionService
+    │   └── domain/            # NewsArticle, DailyEdition entities
+    └── official/              # Officials & Postings
+        ├── api/               # OfficialController
+        ├── application/       # OfficialService
+        └── domain/            # Official entity, temporal queries
 ```
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "query": "exam leak",
-    "matches": [{
-      "categoryName": "Examination Irregularity",
-      "responsibleDepartment": {
-        "name": "National Testing Agency",
-        "currentOfficials": [{
-          "fullName": "Pradeep Singh Kharola",
-          "postingTitle": "Director General",
-          "contactEmail": "dg@nta.ac.in"
-        }]
-      },
-      "accountabilityChain": [...],
-      "citizenActions": [...],
-      "relevantActs": [{
-        "name": "Right to Information Act",
-        "year": 2005,
-        "officialUrl": "https://rtionline.gov.in"
-      }]
-    }]
-  }
-}
-```
+## Database Highlights
 
-### Get Department Officials
-GET /api/v1/departments/{code}/officials
-GET /api/v1/departments/{code}/officials?asOf=2024-01-15
-
-## Getting Started
-
-### Prerequisites
-- Java 21
-- Docker Desktop
-- Git
-
-### Run locally
-
-**1. Clone the repo:**
-```bash
-git clone https://github.com/shresthbhargava/civicos.git
-cd civicos
-```
-
-**2. Start PostgreSQL:**
-```bash
-docker-compose up -d
-```
-
-**3. Run the application:**
-```bash
-./gradlew bootRun
-```
-
-**4. Test the API:**
-```bash
-curl "http://localhost:8080/api/v1/incidents/search?query=exam+leak"
-```
-
-### Run Tests
-```bash
-./gradlew test
-```
-
-Tests use Testcontainers — Docker must be running.
-
-## Database Design Highlights
-
-**Temporal official postings** — the database physically prevents two active officials for the same department using PostgreSQL exclusion constraints:
+Temporal Postings with Physical Guarantees
+PostgreSQL exclusion constraints prevent two active officials for the same department — enforced at the database level, not just application logic:
 
 ```sql
 EXCLUDE USING gist (
   department_id WITH =,
-  daterange(start_date, COALESCE(end_date, '9999-12-31'), '[]') WITH &&
+  daterange(start_date, COALESCE(end_date,'9999-12-31'),'[]') WITH &&
 )
 ```
 
-**Recursive accountability chain** — single CTE query traverses the full hierarchy:
+### Recursive Accountability
 
 ```sql
 WITH RECURSIVE accountability_chain AS (
@@ -185,23 +229,74 @@ WITH RECURSIVE accountability_chain AS (
 SELECT * FROM accountability_chain ORDER BY depth ASC
 ```
 
-## Project Structure
+## Getting Started
 
+### Prerequisites
+
+- Java 21
+- Docker Desktop
+- Git
+- Groq API Key
+- NewsData.io API Key
+- Supabase
+
+### Run
+
+```bash
+# Clone
+git clone https://gitlab.com/shresthbhargava/civic-record.git
+cd civic-record
+
+# Environment variables
+export GROQ_API_KEY=gsk_xxx
+export NEWSDATA_API_KEY=xxx
+export SPRING_DATASOURCE_URL=jdbc:postgresql://...
+export SPRING_DATASOURCE_USERNAME=postgres
+export SPRING_DATASOURCE_PASSWORD=xxx
+
+# Start local PostgreSQL
+docker-compose up -d
+
+# Run
+./gradlew bootRun
 ```
-src/main/java/com/civicos/platform/
-├── common/
-│   ├── exception/        # Global exception handling
-│   ├── logging/          # Request tracing
-│   └── response/         # API response envelope
-├── config/              # CORS, Security config
-|── domain/
-├── act/              # Acts & Laws
-├── department/       # Department hierarchy
-├── incident/         # Incident search
-└── official/         # Officials & postings
+
+### Tests
+
+```bash
+./gradlew test
 ```
-## Built With ❤️ for India
+Tests use Testcontainers — Docker must be running.
 
-CivicOS was built to solve a real problem — 1.4 billion Indians deserve to know who is accountable for their civic issues.
+## CI/CD
 
-Built by [Shresth Bhargava](https://github.com/shresthbhargava) 
+GitLab pipelines run automatically on every push:
+
+| Stage | Jobs | What it does |
+|-------|------|-------------|
+| `build` | compileJava | Compilation check |
+| `test` | test | JUnit 5 + Testcontainers |
+| `security` | sast, secret_detection | Vulnerability & secret scanning |
+
+## Deployment
+
+| Component | Platform |
+|-----------|----------|
+| Frontend | Vercel |
+| Backend | Render |
+| Database | Supabase |
+| CI/CD | GitLab |
+
+## License
+
+MIT License.
+
+---
+
+<div align="center">
+
+**Built with determination for 1.4 billion citizens.**
+
+**Built by Shresth Bhargava**
+
+</div>
