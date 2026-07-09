@@ -82,6 +82,8 @@ info:
 
 logging:
   level:
+    org.apache.kafka: WARN
+    org.springframework.kafka: WARN
     root: INFO
     com.civicos: DEBUG
   pattern:
@@ -109,5 +111,6 @@ newsdata:
 
 groq:
   api-key: ${GROQ_API_KEY:}
+
 
 
