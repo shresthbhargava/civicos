@@ -21,6 +21,7 @@ build:
   before_script:
     - export GRADLE_USER_HOME=$(pwd)/.gradle
   script:
+    - chmod +x gradlew
     - ./gradlew compileJava --no-daemon
   artifacts:
     paths:
@@ -33,7 +34,8 @@ test:
   before_script:
     - export GRADLE_USER_HOME=$(pwd)/.gradle
   script:
-    - ./gradlew test --no-daemon
+    - chmod +x gradlew
+    - ./gradlew compileJava --no-daemon
   artifacts:
     when: always
     reports:
